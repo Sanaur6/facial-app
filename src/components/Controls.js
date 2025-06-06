@@ -15,13 +15,25 @@ function Controls({
       <button className="styled-btn" onClick={onToggleDetection}>
         {detecting ? 'Stop Detection' : 'Start Detection'}
       </button>
-      <button className="styled-btn" onClick={onToggleExpressions}>
+      <button
+        className="styled-btn"
+        onClick={onToggleExpressions}
+        disabled={!detecting}
+      >
         {showExpressions ? 'Hide Expressions' : 'Show Expressions'}
       </button>
-      <button className="styled-btn" onClick={onSnapshot}>
+      <button
+        className="styled-btn"
+        onClick={onSnapshot}
+        disabled={!detecting}
+      >
         Take Snapshot
       </button>
-      <label htmlFor="upload-snapshot" className="styled-btn" style={{ cursor: 'pointer', marginBottom: 0 }}>
+      <label
+        htmlFor="upload-snapshot"
+        className={`styled-btn${!detecting ? ' disabled' : ''}`}
+        style={{ cursor: detecting ? 'pointer' : 'not-allowed', marginBottom: 0 }}
+      >
         Upload Snapshot
         <input
           type="file"
@@ -29,6 +41,7 @@ function Controls({
           style={{ display: 'none' }}
           id="upload-snapshot"
           onChange={onUpload}
+          disabled={!detecting}
         />
       </label>
       <div className="face-count">

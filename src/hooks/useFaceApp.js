@@ -9,19 +9,13 @@ export function useFaceApp() {
   const [showExpressions, setShowExpressions] = useState(true);
   const [snapshot, setSnapshot] = useState(null);
   const [uploadedResult, setUploadedResult] = useState(null);
+  const [modelsLoaded, setModelsLoaded] = useState(false);
+  const [latestDetections, setLatestDetections] = useState([]);
 
   useEffect(() => {
     const MODEL_URL = process.env.PUBLIC_URL + '/models';
-    loadModels(MODEL_URL).then(() => {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-          videoRef.current.srcObject = stream;
-        })
-        .catch(err => {
-          console.error('Error accessing webcam:', err);
-        });
-    });
-
+    loadModels(MODEL_URL).then(() => setModelsLoaded(true));
+    // Do NOT start camera here
     return () => {
       if (videoRef.current && videoRef.current.srcObject) {
         videoRef.current.srcObject.getTracks().forEach(track => track.stop());
@@ -29,7 +23,33 @@ export function useFaceApp() {
     };
   }, []);
 
-  const handleToggleDetection = () => setDetecting(prev => !prev);
+  const handleToggleDetection = () => {
+  if (!detecting) {
+    // Prefer rear camera on mobile
+    const constraints = {
+      video: {
+        facingMode: { ideal: 'environment' }
+      }
+    };
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then(stream => {
+        videoRef.current.srcObject = stream;
+        setDetecting(true);
+      })
+      .catch(err => {
+        console.error('Error accessing webcam:', err);
+      });
+  } else {
+    if (videoRef.current && videoRef.current.srcObject) {
+      videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setDetecting(false);
+    setFaceCount(0);
+    setLatestDetections([]);
+  }
+};
+
   const handleToggleExpressions = () => setShowExpressions(prev => !prev);
 
   const handleSnapshot = () => {
@@ -69,6 +89,7 @@ export function useFaceApp() {
         .withFaceLandmarks()
         .withFaceExpressions();
       setUploadedResult({ imgSrc: img.src, detections });
+      setLatestDetections(detections);
     };
   };
 
@@ -80,6 +101,7 @@ export function useFaceApp() {
     showExpressions,
     snapshot,
     uploadedResult,
+    latestDetections,
     setFaceCount,
     handleToggleDetection,
     handleToggleExpressions,

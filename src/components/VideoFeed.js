@@ -1,5 +1,5 @@
 import React from 'react';
-import './components.css'; // Import the CSS for this component
+import './components.css';
 import { useVideoDetection } from '../hooks/useVideoDetection';
 
 function VideoFeed({ videoRef, canvasRef, detecting, showExpressions, setFaceCount }) {
@@ -21,6 +21,11 @@ function VideoFeed({ videoRef, canvasRef, detecting, showExpressions, setFaceCou
         height="560"
         className="canvas-element"
       />
+      {!detecting && (
+        <div className="camera-overlay">
+          <span>Camera is Off<br />Click "Start Detection" to enable</span>
+        </div>
+      )}
     </div>
   );
 }
